@@ -1,14 +1,22 @@
 import React, { useRef, useState } from "react";
 import { FiUpload } from "react-icons/fi";
 
-const ProfilePhotoSelector = () => {
-  const [image, setImage] = useState(null);
+const ProfilePhotoSelector = ({ image, setImage }) => {
+  const [localImage, setLocalImage] = useState(null);
   const fileRef = useRef(null);
+
+  const previewImage = image ?? localImage;
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file));
+      const imageUrl = URL.createObjectURL(file);
+
+      if (typeof setImage === "function") {
+        setImage(imageUrl);
+      } else {
+        setLocalImage(imageUrl);
+      }
     }
   };
 
@@ -20,9 +28,9 @@ const ProfilePhotoSelector = () => {
           onClick={() => fileRef.current.click()}
           className="w-24 h-24 rounded-full bg-purple-100 flex items-center justify-center cursor-pointer overflow-hidden"
         >
-          {image ? (
+          {previewImage ? (
             <img
-              src={image}
+              src={previewImage}
               alt="Profile"
               className="w-full h-full object-cover"
             />

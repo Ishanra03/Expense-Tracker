@@ -1,24 +1,14 @@
-import React, { useContext } from "react";
-import { UserContext } from "../../context/UserContext";
-import Navbar from "./Navbar";
-import SideMenu from "./SideMenu";
+import { Outlet } from "react-router-dom";
+import Sidebar from "../Sidebar";
 
-const DashboardLayout = ({ children, activeMenu }) => {
-  const { user } = useContext(UserContext);
-
+const DashboardLayout = () => {
   return (
-    <div>
-      <Navbar activeMenu={activeMenu} />
+    <div className="flex h-screen">
+      <Sidebar />
 
-      {user && (
-        <div className="flex">
-          <div className="max-[1080px]:hidden">
-            <SideMenu activeMenu={activeMenu} />
-          </div>
-
-          <div className="grow mx-5">{children}</div>
-        </div>
-      )}
+      <div className="flex-1 p-6 bg-gray-100">
+        <Outlet /> {/* 🔥 THIS IS REQUIRED */}
+      </div>
     </div>
   );
 };

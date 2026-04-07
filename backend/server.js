@@ -1,74 +1,66 @@
-// require("dotenv").config();
-// const express = require("express");
-// const cors = require("cors");
-// const path = require("path");
-// const connectDB = require("./Configuration/db");
-// const AuthRoutes = require("./routes/AuthRoutes");
-
-// const app = express();
-
-// // CORS middleware
-// app.use(
-//   cors({
-//     origin: process.env.CLIENT_URL || "*",
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
-
-// app.use(express.json());
-
-// connectDB();
-
-// app.use("/api/v1/auth",AuthRoutes);
-
-// const PORT = process.env.PORT || 5000;
-
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
-
 require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+
 const connectDB = require("./Configuration/db");
+
+// Routes
 const AuthRoutes = require("./routes/AuthRoutes");
 const IncomeRoutes = require("./routes/IncomeRoutes");
+const ExpenseRoutes = require("./routes/ExpenseRoutes");
+const DashRoutes = require("./routes/DashRoutes");
 
 const app = express();
 
-// CORS middleware
+
+// 🌐 CORS Setup
 app.use(
   cors({
     origin: "*",
-    methods: "*",
-    allowedHeaders: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+
+// 📦 Middleware
 app.use(express.json());
 
-// CONNECT DATABASE
+
+// 🗄️ Connect Database
 connectDB();
 
 
-// TEST ROUTE (to check if server works)
-// app.get("/test", (req, res) => {
-//   res.send("Server working");
-// });
+// 🏠 Root Route (Test)
+app.get("/", (req, res) => {
+  res.send("Expense Tracker API is running...");
+});
 
 
-// AUTH ROUTES
+// 🔐 Routes
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/income", IncomeRoutes);
+app.use("/api/v1/expense", ExpenseRoutes);
+app.use("/api/v1/dashboard", DashRoutes);
 
-//Server Uploads folder
+
+// 📁 Static Folder (for uploaded images)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
-const PORT = process.env.PORT || 5000;
+// ❌ Handle Unknown Routes
+app.use((req, res) => {
+  res.status(404).json({
+    message: "Route not found",
+  });
+});
+
+
+// 🚀 Server Start
+const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
