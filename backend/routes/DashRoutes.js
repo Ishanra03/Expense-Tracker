@@ -9,8 +9,8 @@ const authMiddleware = require("../middleware/authMiddleware");
 // 📊 Dashboard API
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const expenses = await Expense.find();
-    const incomes = await Income.find();
+    const expenses = await Expense.find({ userId: req.user.id });
+    const incomes = await Income.find({ userId: req.user.id });
 
     const totalExpense = expenses.reduce((acc, curr) => acc + curr.amount, 0);
     const totalIncome = incomes.reduce((acc, curr) => acc + curr.amount, 0);
@@ -21,6 +21,7 @@ router.get("/", authMiddleware, async (req, res) => {
       totalIncome,
       totalExpense,
       balance,
+      transactions: [],
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

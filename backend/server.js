@@ -10,6 +10,8 @@ const connectDB = require("./Configuration/db");
 const AuthRoutes = require("./routes/AuthRoutes");
 const IncomeRoutes = require("./routes/IncomeRoutes");
 const ExpenseRoutes = require("./routes/ExpenseRoutes");
+const BudgetRoutes = require("./routes/BudgetRoutes");
+const GoalFundRoutes = require("./routes/GoalFundRoutes");
 const DashRoutes = require("./routes/DashRoutes");
 
 const app = express();
@@ -43,6 +45,8 @@ app.get("/", (req, res) => {
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/income", IncomeRoutes);
 app.use("/api/v1/expense", ExpenseRoutes);
+app.use("/api/v1/budget", BudgetRoutes);
+app.use("/api/v1/goal-fund", GoalFundRoutes);
 app.use("/api/v1/dashboard", DashRoutes);
 
 

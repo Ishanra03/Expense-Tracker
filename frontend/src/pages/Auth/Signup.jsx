@@ -1,201 +1,124 @@
-import React, { useState } from "react";
+﻿import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Input from "../../components/input/input";
+import { validateEmail } from "../../utils/Helper";
+import ProfilePhotoSelector from "../../components/input/ProfilePhotoSelector";
+import { useUser } from "../../context/UserContext";
 import { API_PATHS } from "../../utils/apiPaths";
+import { mapBackendUserToClient } from "../../utils/userProfileApi";
 
-const Signup = ({ setIsAuthenticated, setShowSignup }) => {
-  const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-  });
-
+const Signup = () => {
+  const [profilePic, setProfilePic] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const navigate = useNavigate();
+  const { updateUser } = useUser();
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
+  const handleSignUp = async (event) => {
+    event.preventDefault();
+
+    if (!fullName.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!validateEmail(normalizedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Please enter your password.");
+      return;
+    }
 
     try {
-      const res = await fetch(API_PATHS.REGISTER, {
+      const response = await fetch(API_PATHS.REGISTER, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(form),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: normalizedEmail,
+          password,
+          profileImageUrl: profilePic || "",
+        }),
       });
 
-      const data = await res.json();
+      const result = await response.json();
 
-      if (res.ok) {
-        localStorage.setItem("token", data.token);
-        setIsAuthenticated(true);
-      } else {
-        setError(data.message || "Signup failed");
+      if (!response.ok) {
+        throw new Error(result?.message || "Signup failed");
       }
+
+      const userData = mapBackendUserToClient(result);
+
+      localStorage.setItem("token", result.token);
+      localStorage.setItem("user", JSON.stringify(userData));
+      updateUser(userData);
+      setError("");
+      navigate("/");
     } catch (err) {
-      setError("Server error");
+      setError(err.message || "Unable to signup. Please try again.");
     }
   };
 
   return (
-    <div style={styles.container}>
-      {/* LEFT */}
-      <div style={styles.left}>
-        <div style={styles.card}>
-          <h2>Create Account 🚀</h2>
+    <div className="mx-auto w-full max-w-[880px] py-4">
+      <h2 className="text-[44px] font-semibold text-slate-950">Create an Account</h2>
+      <p className="mt-2 text-lg text-slate-600">Join us today by entering details below.</p>
 
-          {error && <p style={styles.error}>{error}</p>}
-
-          <form onSubmit={handleSignup} style={styles.form}>
-            <input
-              name="fullName"
-              placeholder="Full Name"
-              onChange={handleChange}
-              style={styles.input}
-              required
-            />
-
-            <input
-              name="email"
-              placeholder="Email Address"
-              onChange={handleChange}
-              style={styles.input}
-              required
-            />
-
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              onChange={handleChange}
-              style={styles.input}
-              required
-            />
-
-            <button style={styles.button}>Sign Up</button>
-          </form>
-
-          <p>
-            Already have an account?{" "}
-            <span style={styles.link} onClick={() => setShowSignup(false)}>
-              Login
-            </span>
-          </p>
+      <form className="mt-6" onSubmit={handleSignUp}>
+        <div className="mb-6 flex justify-center">
+          <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
         </div>
-      </div>
 
-      {/* RIGHT SAME AS LOGIN */}
-      <div style={styles.right}>
-        <div style={styles.overlay}>
-          <h2>Track your Income & Expenses</h2>
+        <Input
+          value={fullName}
+          onChange={(event) => setFullName(event.target.value)}
+          label="Full Name"
+          placeholder="Dev"
+          type="text"
+        />
 
-          <div style={styles.statCard}>
-            <p>Total Balance</p>
-            <h3>₹4,30,000</h3>
-          </div>
+        <div className="mt-1 grid grid-cols-1 gap-5 md:grid-cols-2">
+          <Input
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            label="Email"
+            placeholder="dev@example.com"
+            type="text"
+          />
 
-          <div style={styles.statCard}>
-            <div style={styles.chartBars}>
-              <div style={{ ...styles.bar, height: "40px" }}></div>
-              <div style={{ ...styles.bar, height: "70px" }}></div>
-              <div style={{ ...styles.bar, height: "50px" }}></div>
-              <div style={{ ...styles.bar, height: "80px" }}></div>
-            </div>
-            <p style={{ marginTop: "10px" }}>Monthly Overview</p>
-          </div>
+          <Input
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            label="Password"
+            placeholder="Enter password"
+            type="password"
+          />
         </div>
-      </div>
+
+        {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
+
+        <button type="submit" className="btn-primary mt-5">
+          Sign Up
+        </button>
+
+        <p className="mt-3 text-[15px] text-slate-700">
+          Already have an account?{" "}
+          <Link className="font-semibold text-primary underline" to="/login">
+            Login
+          </Link>
+        </p>
+      </form>
     </div>
   );
 };
 
 export default Signup;
-
-const styles = {
-  container: {
-    display: "flex",
-    height: "100vh",
-  },
-
-  left: {
-    flex: 1,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#f8fafc",
-  },
-
-  card: {
-    width: "350px",
-    background: "#fff",
-    padding: "30px",
-    borderRadius: "12px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-  },
-
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    marginTop: "20px",
-  },
-
-  input: {
-    padding: "12px",
-    marginBottom: "15px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-  },
-
-  button: {
-    padding: "12px",
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-  },
-
-  error: {
-    color: "red",
-  },
-
-  link: {
-    color: "#2563eb",
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-
-  right: {
-    flex: 1,
-    background: "linear-gradient(135deg, #6366f1, #2563eb)",
-    color: "#fff",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  overlay: {
-    textAlign: "center",
-  },
-
-  statCard: {
-    background: "rgba(255,255,255,0.2)",
-    padding: "20px",
-    borderRadius: "10px",
-    marginTop: "20px",
-  },
-
-  chartBars: {
-    display: "flex",
-    gap: "10px",
-    justifyContent: "center",
-    marginTop: "10px",
-  },
-
-  bar: {
-    width: "10px",
-    background: "#fff",
-    borderRadius: "5px",
-    animation: "grow 1s ease-in-out",
-  },
-};

@@ -21,13 +21,13 @@ export default Navbar;
 
 const styles = {
   navbar: {
-    height: "60px",
+    height: "6px",
     backgroundColor: "#1e293b",
     color: "#fff",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "0 20px",
+    padding: "0 4px",
     position: "fixed",
     top: 0,
     left: 0,
@@ -36,10 +36,10 @@ const styles = {
   },
   logo: {
     margin: 0,
-    fontSize: "20px",
+    fontSize: "10px",
   },
   logoutBtn: {
-    padding: "8px 15px",
+    padding: "7px 9px",
     backgroundColor: "#ef4444",
     border: "none",
     color: "#fff",
